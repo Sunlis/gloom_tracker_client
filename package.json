@@ -10,13 +10,15 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@material-ui/core": "^1.4.0",
+    "@material-ui/icons": "^1.1.0",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-react": "^6.24.1",
-    "material-ui": "^0.19.4",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "style-it": "^2.0.0",
     "webpack": "^4.0.0"
   },
   "devDependencies": {
