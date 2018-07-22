@@ -28,9 +28,21 @@ var config = {
       {
         test : /\.jsx?/,
         include : APP_DIR,
-        loader : 'babel-loader'
-      }
-    ]
+        loader : 'babel-loader',
+      },
+      {
+        test: /\.(png|jp(e*)g|svg)$/,  
+        use: [
+          {
+            loader: 'url-loader',
+            options: { 
+              limit: 8000, // Convert images < 8kb to base64 strings
+              name: 'img/[hash]-[name].[ext]',
+            } ,
+          },
+        ],
+      },
+    ],
   },
   devServer: {
     host: 'localhost',
