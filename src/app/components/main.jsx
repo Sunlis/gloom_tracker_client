@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as _ from 'lodash';
 
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
@@ -10,8 +11,7 @@ import hamburger from '../../img/hamburger.png';
 import {NewCounterDialog} from './new-counter-dialog.jsx';
 import {CounterBar} from './counter-bar.jsx';
 import {DrawerContents} from './drawer-contents.jsx';
-
-// import {socket} from '../socket.js';
+import { socket } from '../socket.js';
 
 const styles = {
   main: {
@@ -52,35 +52,38 @@ export class Main extends React.Component {
     super(props);
 
     this.state = {
-      counters: [
-        {
-          current: 5,
-          max: 10,
-          label: 'Health',
-          colour: 'red',
-        },
-        {
-          current: 5,
-          max: 0,
-          label: 'XP',
-          colour: 'blue',
-        },
-        {
-          current: 0,
-          max: 0,
-          colour: 'grey',
-        },
-        {
-          current: 8,
-          max: 25,
-          label: 'Personal Quest',
-          colour: 'brown',
-        },
-      ],
+      counters: this.props.counters || [],
+      name: this.props.name || '',
       dialogOpen: false,
-      drawerOpen: false,
-      name: this.props.name || 'Slurm S. McKenzie',
+      drawerOpen: true,
     };
+  }
+
+  componentDidMount() {
+    this.refreshCounters();
+    socket.emit('get_name', {}, (result) => {
+      this.setState({
+        name: result || '',
+      });
+    });
+    socket.on('set_counters', (counters) => {
+      this.setState({
+        counters
+      });
+    });
+    socket.on('set_name', (name) => {
+      this.setState({
+        name
+      });
+    });
+  }
+
+  refreshCounters = () => {
+    socket.emit('get_counters', {}, (result) => {
+      this.setState({
+        counters: result || [],
+      });
+    });
   }
 
   newCounterClick = () => {
@@ -90,10 +93,10 @@ export class Main extends React.Component {
   }
 
   handleNewCounter = (counter) => {
-    let counters = this.state.counters;
-    counters.push(counter);
+    socket.emit('new_counter', {counter}, () => {
+      this.refreshCounters();
+    });
     this.setState({
-      counters: counters,
       dialogOpen: false,
     });
   }
@@ -110,13 +113,20 @@ export class Main extends React.Component {
     });
   }
 
+  updateCounter = () => {
+    this.refreshCounters();
+  }
+
   render() {
-    let counters = this.state.counters.map((counter, index) => {
+    let counters = _.map(_.sortBy(this.state.counters, 'index'), (counter, index) => {
       return <CounterBar key={index}
+                         index={index}
                          current={counter.current}
                          max={counter.max}
                          label={counter.label}
-                         colour={counter.colour}>
+                         colour={counter.colour}
+                         priv={counter.priv}
+                         updateCounter={this.updateCounter}>
              </CounterBar>
     });
 

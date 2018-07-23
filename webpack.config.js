@@ -1,6 +1,8 @@
-var webpack = require('webpack');
+const webpack = require('webpack');
+const path = require('path');
+const fs = require('fs');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-var path = require('path');
+const WebpackOnBuildPlugin = require('on-build-webpack');
 
 var BUILD_DIR = path.resolve(__dirname, 'bin');
 var APP_DIR = path.resolve(__dirname, 'src/app');
@@ -15,6 +17,23 @@ const HTMLWebpackPluginConfig = new HTMLWebpackPlugin({
 
 const DefinePluginConfig = new webpack.DefinePlugin({
   'process.env.NODE_ENV': JSON.stringify('production'),
+});
+
+const OnBuildPlugin = new WebpackOnBuildPlugin(function(stats) {
+  const newlyCreatedAssets = stats.compilation.assets;
+
+  const unlinked = [];
+  fs.readdir(path.resolve(BUILD_DIR), (err, files) => {
+    files.forEach(file => {
+      if (!newlyCreatedAssets[file] && !fs.lstatSync(BUILD_DIR + '/' + file).isDirectory()) {
+        fs.unlinkSync(path.resolve(BUILD_DIR + '/' + file));
+        unlinked.push(file);
+      }
+    });
+    if (unlinked.length > 0) {
+      console.log('Removed old assets: ', unlinked);
+    }
+  });
 });
 
 var config = {
@@ -50,13 +69,16 @@ var config = {
     hot: true,
   },
   mode: dev ? 'development' : 'production',
-  plugins: dev ? [
+  plugins: [
     HTMLWebpackPluginConfig,
+    OnBuildPlugin,
+  ].concat(dev ? [
+    //dev
     new webpack.HotModuleReplacementPlugin(),
   ] : [
-    HTMLWebpackPluginConfig,
-    DefinePluginConfig
-  ],
+    //prod
+    DefinePluginConfig,
+  ]),
 };
 
 module.exports = config;

@@ -4,12 +4,13 @@ import Style from 'style-it';
 import Button from '@material-ui/core/Button';
 import Add from '@material-ui/icons/Add';
 import Remove from '@material-ui/icons/Remove';
+import Lock from '@material-ui/icons/Lock';
 import {
   red, pink, purple, deepPurple, indigo, blue, lightBlue, cyan, teal,
   green, lightGreen, lime, yellow, amber, orange, deepOrange, brown, grey
 } from '@material-ui/core/colors';
 
-// import {socket} from '../socket.js';
+import { socket } from '../socket.js';
 
 const styles = {
   outer: {
@@ -42,14 +43,24 @@ const styles = {
     margin: '0 16px',
     width: '50%',
     textAlign: 'center',
+    alignItems: 'center',
     fontWeight: 400,
     textShadow: '0 0 8px rgba(255, 255, 255, 0.2)',
   },
   label: {
     fontSize: '24px',
+    display: 'flex',
+    alignItems: 'flex-end',
+    flexDirection: 'row',
   },
   count: {
     fontSize: '48px',
+  },
+  lock: {
+    opacity: 0.5,
+    margin: '0 2px 4px 0',
+    width: '20px',
+    height: '20px',
   },
   button: {
     height: 'calc(100% - 16px)',
@@ -84,9 +95,15 @@ export class CounterBar extends React.Component {
     super(props);
 
     this.state = {
-      max: props.max || null,
+      max: (props.max && props.max > 0) ? props.max : null,
       current: props.current || 0,
     };
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (this.state.current != prevState.current) {
+      this.updateCounter();
+    }
   }
 
   handleRemoveClick = () => {
@@ -96,23 +113,37 @@ export class CounterBar extends React.Component {
   }
 
   handleAddClick = () => {
-    if (!this.props.max) {
+    if (!this.state.max) {
       this.setState({
         current: this.state.current + 1,
       });
     } else {
       this.setState({
-        current: Math.min(this.props.max, this.state.current + 1),
+        current: Math.min(this.state.max, this.state.current + 1),
       });
     }
+  }
+
+  updateCounter = () => {
+    let properties = {
+      current: this.state.current,
+      max: this.state.max,
+      label: this.props.label,
+      colour: this.props.colour,
+      priv: this.props.priv,
+      index: this.props.index,
+    };
+    socket.emit('update_counter', {counter: properties}, () => {
+      this.props.updateCounter();
+    });
   }
 
   render() {
     let count;
     let barSize = '100%';
-    if (this.props.max) {
-      count = `${this.state.current} / ${this.props.max}`;
-      barSize = Math.round(this.state.current / this.props.max*100) + '%';
+    if (this.state.max > 0) {
+      count = `${this.state.current} / ${this.state.max}`;
+      barSize = Math.round(this.state.current / this.state.max*100) + '%';
     } else {
       count = `${this.state.current}`;
     }
@@ -140,6 +171,8 @@ export class CounterBar extends React.Component {
       borderRadius: '0 8px 8px 0',
     };
 
+    let lock = this.props.priv ? <Lock style={styles.lock}></Lock> : '';
+
     return Style.it(`
       .bar::before {
         content: '';
@@ -158,7 +191,7 @@ export class CounterBar extends React.Component {
             <Remove></Remove>
           </div>
           <div style={styles.labelContainer}>
-            <span style={styles.label}>{this.props.label}</span>
+            <span style={styles.label}>{lock} {this.props.label}</span>
             <span style={styles.count}>{count}</span>
           </div>
           <div style={rightButtonStyle} onClick={this.handleAddClick}>

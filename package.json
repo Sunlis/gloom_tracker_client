@@ -16,6 +16,7 @@
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-react": "^6.24.1",
+    "lodash": "^4.17.10",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "style-it": "^2.0.0",
@@ -28,6 +29,7 @@
     "babel-preset-react": "^6.24.1",
     "file-loader": "^1.1.11",
     "html-webpack-plugin": "^3.2.0",
+    "on-build-webpack": "^0.1.0",
     "url-loader": "^1.0.1",
     "webpack-cli": "^3.0.8",
     "webpack-dev-server": "^3.1.4"

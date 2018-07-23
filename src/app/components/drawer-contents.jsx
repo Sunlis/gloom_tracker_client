@@ -1,12 +1,6 @@
 import * as React from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Divider from '@material-ui/core/Divider';
 import Tune from '@material-ui/icons/Tune';
 import People from '@material-ui/icons/People';
@@ -15,10 +9,11 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import TextField from '@material-ui/core/TextField';
 import { blue } from '@material-ui/core/colors';
 
 import hamburger from '../../img/hamburger.png';
+import { CharacterEditDialog } from './character-edit-dialog.jsx';
+import { CounterEditDialog } from './counter-edit-dialog.jsx';
 
 // import {socket} from '../socket.js';
 
@@ -54,7 +49,7 @@ export class DrawerContents extends React.Component {
 
     this.state = {
       characterEditOpen: false,
-      characterName: props.name || 'Name',
+      counterEditOpen: true,
     };
   }
 
@@ -74,15 +69,10 @@ export class DrawerContents extends React.Component {
     });
   }
 
-  handleNameChange = (ev) => {
+  closeCounterDialog = () => {
     this.setState({
-      characterName: ev.target.value,
+      counterEditOpen: false,
     });
-  }
-
-  handleCharacterNameSave = () => {
-    //TODO: socket shit
-    this.closeCharacterDialog();
   }
 
   render() {
@@ -108,26 +98,14 @@ export class DrawerContents extends React.Component {
           </ListItem>
         </List>
         {/* Character Name */}
-        <Dialog open={this.state.characterEditOpen} onClose={this.closeCharacterDialog}>
-          <DialogTitle>Edit Character Name</DialogTitle>
-          <DialogContent>
-            <TextField label="Character Name"
-                       type="text"
-                       onChange={this.handleNameChange}
-                       value={this.state.characterName} />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.closeCharacterDialog}>
-              Cancel
-            </Button>
-            <Button color="primary"
-                    onClick={this.handleCharacterNameSave}>
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <CharacterEditDialog open={this.state.characterEditOpen}
+                             name={this.props.name}
+                             onClose={this.closeCharacterDialog}>
+        </CharacterEditDialog>
+        <CounterEditDialog open={this.state.counterEditOpen}
+                           onClose={this.closeCounterDialog}>
+        </CounterEditDialog>
         {/* Edit Counters */}
-
         {/* View All */}
       </div>
     );
