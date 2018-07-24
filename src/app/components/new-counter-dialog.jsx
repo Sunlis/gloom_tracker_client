@@ -76,25 +76,25 @@ export class NewCounterDialog extends React.Component {
     super(props);
 
     this.state = {
-      open: props.open,
       selected: 15,
-      max: 0,
+      max: '',
       name: '',
       priv: true,
     };
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({
-      ...this.state,
-      ...nextProps,
-    });
+  handleCancelClick = () => {
+    this.handeClose();
   }
 
-  handleCancelClick = () => {
+  handeClose = () => {
     this.setState({
-      open: false,
+      selected: 15,
+      max: '',
+      name: '',
+      priv: true,
     });
+    this.props.onClose();
   }
 
   dialogAddClick = () => {
@@ -109,9 +109,7 @@ export class NewCounterDialog extends React.Component {
     if (this.props.createNewCounter) {
       this.props.createNewCounter(counter);
     }
-    this.setState({
-      open: false,
-    });
+    this.handeClose();
   }
 
   colourButtonClick = (ev) => {
@@ -166,7 +164,7 @@ export class NewCounterDialog extends React.Component {
     });
 
     return (
-      <ResponsiveDialog open={this.state.open}
+      <ResponsiveDialog open={this.props.open}
                         style={styles.dialog}>
         <DialogTitle>New Counter</DialogTitle>
         <DialogContent>

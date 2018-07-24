@@ -89,6 +89,10 @@ const COLOUR_NAMES = [
   'deepOrange', 'brown', 'grey'
 ];
 
+const LONG_PRESS_DELAY = 500;
+
+const LONG_PRESS_INTERVAL = 150;
+
 export class CounterBar extends React.Component {
 
   constructor(props) {
@@ -106,24 +110,6 @@ export class CounterBar extends React.Component {
     }
   }
 
-  handleRemoveClick = () => {
-    this.setState({
-      current: Math.max(0, this.state.current - 1),
-    });
-  }
-
-  handleAddClick = () => {
-    if (!this.state.max) {
-      this.setState({
-        current: this.state.current + 1,
-      });
-    } else {
-      this.setState({
-        current: Math.min(this.state.max, this.state.current + 1),
-      });
-    }
-  }
-
   updateCounter = () => {
     let properties = {
       current: this.state.current,
@@ -136,6 +122,68 @@ export class CounterBar extends React.Component {
     socket.emit('update_counter', {counter: properties}, () => {
       this.props.updateCounter();
     });
+  }
+
+  handleRemoveMouseDown = () => {
+    this.removePressed = (new Date());
+    this.removeTimeout = setTimeout(() => {
+      this.removeInterval = setInterval(() => {
+        this.setCurrent(this.state.current - 1);
+      }, LONG_PRESS_INTERVAL);
+    }, LONG_PRESS_DELAY);
+  }
+  handleRemoveMouseUp = () => {
+    if (this.removeTimeout) {
+      clearTimeout(this.removeTimeout);
+      this.removeTimeout = null;
+    }
+    if (this.removeInterval) {
+      clearInterval(this.removeInterval);
+      this.removeInterval = null;
+    }
+    if ((new Date()) - this.removePressed < LONG_PRESS_DELAY) {
+      this.setCurrent(this.state.current - 1);
+    }
+    this.removePressed = new Date(0);
+  }
+
+  handleAddMouseDown = () => {
+    this.addPressed = (new Date());
+    this.addTimeout = setTimeout(() => {
+      this.addInterval = setInterval(() => {
+        this.setCurrent(this.state.current + 1);
+      }, LONG_PRESS_INTERVAL);
+    }, LONG_PRESS_DELAY);
+  }
+  handleAddMouseUp = () => {
+    if (this.addTimeout) {
+      clearTimeout(this.addTimeout);
+      this.addTimeout = null;
+    }
+    if (this.addInterval) {
+      clearInterval(this.addInterval);
+      this.addInterval = null;
+    }
+    if ((new Date()) - this.addPressed < LONG_PRESS_DELAY) {
+      this.setCurrent(this.state.current + 1);
+    }
+    this.addPressed = new Date(0);
+  }
+
+  setCurrent = (value) => {
+    if (this.state.max) {
+      this.setState({
+        current: Math.max(0, Math.min(this.state.max, value)),
+      });
+    } else {
+      this.setState({
+        current: Math.max(0, value),
+      });
+    }
+  }
+
+  handleAddClick = () => {
+    
   }
 
   render() {
@@ -187,14 +235,22 @@ export class CounterBar extends React.Component {
       }`,
       <div style={outerStyle}>
         <div className='bar' style={styles.bar}>
-          <div style={leftButtonStyle} onClick={this.handleRemoveClick}>
+          <div style={leftButtonStyle}
+               onMouseDown={this.handleRemoveMouseDown}
+               onTouchStart={this.handleRemoveMouseDown}
+               onMouseUp={this.handleRemoveMouseUp}
+               onTouchEnd={this.handleRemoveMouseUp}>
             <Remove></Remove>
           </div>
           <div style={styles.labelContainer}>
             <span style={styles.label}>{lock} {this.props.label}</span>
             <span style={styles.count}>{count}</span>
           </div>
-          <div style={rightButtonStyle} onClick={this.handleAddClick}>
+          <div style={rightButtonStyle}
+               onMouseDown={this.handleAddMouseDown}
+               onTouchStart={this.handleAddMouseDown}
+               onMouseUp={this.handleAddMouseUp}
+               onTouchEnd={this.handleAddMouseUp}>
             <Add></Add>
           </div>
         </div>

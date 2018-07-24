@@ -6,10 +6,15 @@ import KeyboardArrowUp from '@material-ui/icons/KeyboardArrowUp';
 import KeyboardArrowDown from '@material-ui/icons/KeyboardArrowDown';
 import Lock from '@material-ui/icons/Lock';
 import LockOpen from '@material-ui/icons/LockOpen';
+import Delete from '@material-ui/icons/Delete';
 import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
-import {socket} from '../socket.js';
-import {getColour} from '../colour.js';
+import * as colour from '../colour.js';
 
 const styles = {
   main: {
@@ -17,13 +22,15 @@ const styles = {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: '32px',
+    flexWrap: 'wrap',
+    minHeight: '32px',
     padding: '4px 0 12px 0',
     margin: '4px 0 12px 0',
     position: 'relative',
   },
   buttons: {
     margin: '0 4px 0 0',
+    flex: 'none',
   },
   button: {
     width: '24px',
@@ -36,8 +43,8 @@ const styles = {
     bottom: 0,
     left: 0,
     right: 0,
-    height: '3px',
-    backgroundColor: getColour('grey', 300),
+    height: '6px',
+    backgroundColor: colour.get('grey', 300),
   },
   lock: {
     opacity: 0.5,
@@ -45,19 +52,24 @@ const styles = {
     height: '20px',
     marginTop: '2px',
   },
+  deleteIcon: {
+    width: '20px',
+    height: '20px',
+    marginTop: '2px',
+  },
   piece: {
     margin: '0 4px',
-    backgroundColor: getColour('grey', 200),
+    backgroundColor: colour.get('grey', 200),
     borderRadius: '99px',
     padding: '8px',
     minWidth: '60px',
     textAlign: 'center',
   },
   input: {
-    width: '25vw',
+    width: '35vw',
   },
   smallInput: {
-    width: '32px',
+    width: '10vw',
     marginLeft: '4px',
   },
   lockButton: {
@@ -72,15 +84,64 @@ export class CounterEditRow extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
+    this.state = {
+      deleteConfirmOpen: false,
+    };
   }
 
   onLabelChange = (ev) => {
-    this.props.updateLabel(this.props.counter.index, ev.target.value);
+    this.props.updateCounter(this.props.counter.index, {
+      ...this.props.counter,
+      label: ev.target.value,
+    });
   }
 
   onMaxChange = (ev) => {
-    this.props.updateMax(this.props.counter.index, ev.target.value);
+    this.props.updateCounter(this.props.counter.index, {
+      ...this.props.counter,
+      max: ev.target.value,
+    });
+  }
+
+  handleLockClick = () => {
+    this.props.updateCounter(this.props.counter.index, {
+      ...this.props.counter,
+      priv: !this.props.counter.priv,
+    });
+  }
+
+  handleDeleteClick = () => {
+    this.setState({
+      deleteConfirmOpen: true,
+    });
+  }
+
+  handleDeleteConfirmClose = () => {
+    this.setState({
+      deleteConfirmOpen: false,
+    });
+  }
+  handleDeleteConfirmNo = () => {
+    this.handleDeleteConfirmClose();
+  }
+  handleDeleteConfirmYes = () => {
+    this.handleDeleteConfirmClose();
+    this.props.deleteCounter(this.props.counter.index);
+  }
+
+  handleColourChange = (ev) => {
+    this.props.updateCounter(this.props.counter.index, {
+      ...this.props.counter,
+      colour: ev.target.value,
+    })
+  }
+
+  handleUpClick = () => {
+    this.props.moveCounterUp(this.props.counter.index);
+  }
+
+  handleDownClick = () => {
+    this.props.moveCounterDown(this.props.counter.index);
   }
 
   render() {
@@ -91,24 +152,34 @@ export class CounterEditRow extends React.Component {
       count += ' / ' + this.props.counter.max;
       progress = (this.props.counter.current / this.props.counter.max) * 100;
     }
+    const dropdownOptions = colour.mapNames((name, i) => {
+      return (<option name={name}
+                      style={{ backgroundColor: colour.get(name, 500) }}
+                      key={i}>{name}</option>);
+    });
+
     return Style.it(`
       .bar::after {
         content: '';
         position: absolute;
         bottom: 0;
         left: 0;
-        height: 3px;
-        background-color: ${getColour(this.props.counter.colour, 500)};
+        top: 0;
+        background-color: ${colour.get(this.props.counter.colour, 500)};
         width: ${progress}%;
       }
       `,
       <div style={styles.main}>
         <div className="bar" style={styles.progress}></div>
         <div style={styles.buttons}>
-          <Button style={styles.button} variant="contained">
+          <Button style={styles.button}
+                  variant="contained"
+                  onClick={this.handleUpClick}>
             <KeyboardArrowUp></KeyboardArrowUp>
           </Button>
-          <Button style={styles.button} variant="contained">
+          <Button style={styles.button}
+                  variant="contained"
+                  onClick={this.handleDownClick}>
             <KeyboardArrowDown></KeyboardArrowDown>
           </Button>
         </div>
@@ -128,11 +199,33 @@ export class CounterEditRow extends React.Component {
                  value={this.props.counter.max || ''} />
         </span>
         <Button variant="contained"
-                style={styles.lockButton}>
+                style={styles.lockButton}
+                onClick={this.handleLockClick}>
           {this.props.counter.priv
             ? <Lock style={styles.lock}></Lock>
             : <LockOpen style={styles.lock}></LockOpen>}
         </Button>
+        <span style={styles.piece}>
+          <select onChange={this.handleColourChange} value={this.props.counter.colour}>
+            {dropdownOptions}
+          </select>
+        </span>
+        <Button variant="contained"
+                style={styles.lockButton}
+                onClick={this.handleDeleteClick}>
+          <Delete></Delete>
+        </Button>
+        <Dialog open={this.state.deleteConfirmOpen}
+                onClose={this.handleDeleteConfirmClose}>
+          <DialogTitle>Are you sure?</DialogTitle>
+          <DialogContent>
+            <DialogContentText>No backsies</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleDeleteConfirmNo}>NO</Button>
+            <Button color="primary" onClick={this.handleDeleteConfirmYes}>YES</Button>
+          </DialogActions>
+        </Dialog>
       </div>
     );
   }

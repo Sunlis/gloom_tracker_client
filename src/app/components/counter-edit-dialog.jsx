@@ -46,29 +46,61 @@ export class CounterEditDialog extends React.Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      counters: [],
+    };
+  }
+
+  componentDidMount() {
     socket.emit('get_counters', {}, (counters) => {
       this.setState({
         counters
       });
     });
+    socket.on('set_counters', this.setCounters);
+  }
 
-    this.state = {
-      counters: [],
-    };
+  componentWillUnmount() {
+    socket.off('set_counters', this.setCounters);
+  }
+
+  setCounters = (counters) => {
+    this.setState({ counters });
   }
 
   handleDoneClick = () => {
     this.props.onClose();
   }
 
-  handleLabelChange = (index, value) => {
+  handleUpdateCounter = (index, counter) => {
+    socket.emit('update_counter', {counter: counter}, () => {});
+  }
+
+  handleDeleteCounter = (index) => {
     let counters = this.state.counters;
-    let counter = counters[index];
-    counter.label = value;
-    counters[index] = counter;
-    this.setState({
-      counters
+    counters.splice(index, 1);
+    socket.emit('update_counters', {counters: counters}, () => {});
+  }
+
+  moveCounter = (before, after) => {
+    let counters = this.state.counters;
+    after = Math.max(0, after);
+    let counter = counters.splice(before, 1)[0];
+    counters.splice(after, 0, counter);
+    counters = counters.map((counter, i) => {
+      return {
+        ...counter,
+        index: i,
+      };
     });
+    socket.emit('update_counters', {counters: counters}, () => {});
+  }
+
+  moveCounterUp = (index) => {
+    this.moveCounter(index, index - 1);
+  }
+  moveCounterDown = (index) => {
+    this.moveCounter(index, index + 1);
   }
 
   render() {
@@ -76,7 +108,10 @@ export class CounterEditDialog extends React.Component {
       return (
         <CounterEditRow counter={counter}
                         key={counter.index}
-                        updateLabel={this.handleLabelChange}>
+                        updateCounter={this.handleUpdateCounter}
+                        deleteCounter={this.handleDeleteCounter}
+                        moveCounterUp={this.moveCounterUp}
+                        moveCounterDown={this.moveCounterDown}>
         </CounterEditRow>
       );
     });

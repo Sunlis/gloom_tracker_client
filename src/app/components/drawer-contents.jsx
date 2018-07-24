@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
-import Divider from '@material-ui/core/Divider';
 import Tune from '@material-ui/icons/Tune';
 import People from '@material-ui/icons/People';
 import TextFields from '@material-ui/icons/TextFields';
@@ -14,6 +13,7 @@ import { blue } from '@material-ui/core/colors';
 import hamburger from '../../img/hamburger.png';
 import { CharacterEditDialog } from './character-edit-dialog.jsx';
 import { CounterEditDialog } from './counter-edit-dialog.jsx';
+import { GlobalCounterList } from './global-counter-list.jsx';
 
 // import {socket} from '../socket.js';
 
@@ -49,7 +49,7 @@ export class DrawerContents extends React.Component {
 
     this.state = {
       characterEditOpen: false,
-      counterEditOpen: true,
+      counterEditOpen: false,
     };
   }
 
@@ -66,6 +66,12 @@ export class DrawerContents extends React.Component {
   closeCharacterDialog = () => {
     this.setState({
       characterEditOpen: false,
+    });
+  }
+
+  openCounterDialog = () => {
+    this.setState({
+      counterEditOpen: true,
     });
   }
 
@@ -92,10 +98,7 @@ export class DrawerContents extends React.Component {
             <ListItemIcon><Tune></Tune></ListItemIcon>
             <ListItemText>Edit Counters</ListItemText>
           </ListItem>
-          <ListItem button onClick={this.openPublicDialog}>
-            <ListItemIcon><People></People></ListItemIcon>
-            <ListItemText>View Party Counters</ListItemText>
-          </ListItem>
+          <GlobalCounterList></GlobalCounterList>
         </List>
         {/* Character Name */}
         <CharacterEditDialog open={this.state.characterEditOpen}

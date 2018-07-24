@@ -55,7 +55,7 @@ export class Main extends React.Component {
       counters: this.props.counters || [],
       name: this.props.name || '',
       dialogOpen: false,
-      drawerOpen: true,
+      drawerOpen: false,
     };
   }
 
@@ -96,6 +96,10 @@ export class Main extends React.Component {
     socket.emit('new_counter', {counter}, () => {
       this.refreshCounters();
     });
+    this.handeNewCounterClose();
+  }
+
+  handeNewCounterClose = () => {
     this.setState({
       dialogOpen: false,
     });
@@ -145,7 +149,10 @@ export class Main extends React.Component {
           <Add></Add>
           Add new counter
         </Button>
-        <NewCounterDialog open={this.state.dialogOpen} createNewCounter={this.handleNewCounter}>
+        <NewCounterDialog
+          open={this.state.dialogOpen}
+          createNewCounter={this.handleNewCounter}
+          onClose={this.handeNewCounterClose}>
         </NewCounterDialog>
         <Drawer open={this.state.drawerOpen}
                 onClose={this.handleDrawerClose}

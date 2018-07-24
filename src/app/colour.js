@@ -22,3 +22,9 @@ export const getColour = (name, key) => {
   colourIndex = colourIndex == -1 ? 0 : colourIndex;
   return COLOURS[colourIndex][key];
 };
+
+export const get = getColour;
+
+export const mapNames = (fn) => {
+  return COLOUR_NAMES.map(fn);
+}
