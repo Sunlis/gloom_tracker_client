@@ -58,6 +58,9 @@ const styles = {
     marginTop: '2px',
   },
   piece: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
     margin: '0 4px',
     backgroundColor: colour.get('grey', 200),
     borderRadius: '99px',
@@ -76,6 +79,13 @@ const styles = {
     minWidth: 0,
     width: '36px',
     borderRadius: '99px',
+  },
+  swatch: {
+    display: 'inline-block',
+    width: '24px',
+    height: '24px',
+    borderRadius: '24px',
+    marginRight: '8px',
   },
 };
 
@@ -206,6 +216,10 @@ export class CounterEditRow extends React.Component {
             : <LockOpen style={styles.lock}></LockOpen>}
         </Button>
         <span style={styles.piece}>
+          <div style={{
+            ...styles.swatch,
+            backgroundColor: colour.get(this.props.counter.colour, 500),
+          }}></div>
           <select onChange={this.handleColourChange} value={this.props.counter.colour}>
             {dropdownOptions}
           </select>

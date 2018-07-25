@@ -104,35 +104,39 @@ export class CounterBar extends React.Component {
     };
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.state.current != prevState.current) {
-      this.updateCounter();
-    }
-  }
+  // componentDidUpdate(prevProps, prevState) {
+  //   if (this.state.current != prevState.current) {
+  //     this.updateCounter();
+  //   }
+  // }
 
-  updateCounter = () => {
-    let properties = {
-      current: this.state.current,
-      max: this.state.max,
-      label: this.props.label,
-      colour: this.props.colour,
-      priv: this.props.priv,
-      index: this.props.index,
-    };
-    socket.emit('update_counter', {counter: properties}, () => {
-      this.props.updateCounter();
+  updateCounter = (props) => {
+    this.props.updateCounter({
+      ...this.props,
+      ...props,
     });
+    // socket.emit('update_counter', {counter: properties}, () => {});
   }
 
-  handleRemoveMouseDown = () => {
+  handleRemoveMouseDown = (ev) => {
+    ev.preventDefault();
+    this.cancelRemoveAsync();
     this.removePressed = (new Date());
     this.removeTimeout = setTimeout(() => {
       this.removeInterval = setInterval(() => {
-        this.setCurrent(this.state.current - 1);
+        this.setCurrent(this.props.current - 1);
       }, LONG_PRESS_INTERVAL);
     }, LONG_PRESS_DELAY);
   }
-  handleRemoveMouseUp = () => {
+  handleRemoveMouseUp = (ev) => {
+    ev.preventDefault();
+    this.cancelRemoveAsync();
+    if ((new Date()) - this.removePressed < LONG_PRESS_DELAY) {
+      this.setCurrent(this.props.current - 1);
+    }
+    this.removePressed = new Date(0);
+  }
+  cancelRemoveAsync = () => {
     if (this.removeTimeout) {
       clearTimeout(this.removeTimeout);
       this.removeTimeout = null;
@@ -141,21 +145,27 @@ export class CounterBar extends React.Component {
       clearInterval(this.removeInterval);
       this.removeInterval = null;
     }
-    if ((new Date()) - this.removePressed < LONG_PRESS_DELAY) {
-      this.setCurrent(this.state.current - 1);
-    }
-    this.removePressed = new Date(0);
   }
 
-  handleAddMouseDown = () => {
+  handleAddMouseDown = (ev) => {
+    ev.preventDefault();
+    this.cancelAddAsync();
     this.addPressed = (new Date());
     this.addTimeout = setTimeout(() => {
       this.addInterval = setInterval(() => {
-        this.setCurrent(this.state.current + 1);
+        this.setCurrent(this.props.current + 1);
       }, LONG_PRESS_INTERVAL);
     }, LONG_PRESS_DELAY);
   }
-  handleAddMouseUp = () => {
+  handleAddMouseUp = (ev) => {
+    ev.preventDefault();
+    this.cancelAddAsync();
+    if ((new Date()) - this.addPressed < LONG_PRESS_DELAY) {
+      this.setCurrent(this.props.current + 1);
+    }
+    this.addPressed = new Date(0);
+  }
+  cancelAddAsync = () => {
     if (this.addTimeout) {
       clearTimeout(this.addTimeout);
       this.addTimeout = null;
@@ -164,36 +174,30 @@ export class CounterBar extends React.Component {
       clearInterval(this.addInterval);
       this.addInterval = null;
     }
-    if ((new Date()) - this.addPressed < LONG_PRESS_DELAY) {
-      this.setCurrent(this.state.current + 1);
-    }
-    this.addPressed = new Date(0);
   }
 
   setCurrent = (value) => {
-    if (this.state.max) {
-      this.setState({
-        current: Math.max(0, Math.min(this.state.max, value)),
+    if (this.props.max) {
+      this.props.updateCounter({
+        ...this.props,
+        current: Math.max(0, Math.min(this.props.max, value)),
       });
     } else {
-      this.setState({
+      this.props.updateCounter({
+        ...this.props,
         current: Math.max(0, value),
       });
     }
   }
 
-  handleAddClick = () => {
-    
-  }
-
   render() {
     let count;
     let barSize = '100%';
-    if (this.state.max > 0) {
-      count = `${this.state.current} / ${this.state.max}`;
-      barSize = Math.round(this.state.current / this.state.max*100) + '%';
+    if (this.props.max > 0) {
+      count = `${this.props.current} / ${this.props.max}`;
+      barSize = Math.round(this.props.current / this.props.max*100) + '%';
     } else {
-      count = `${this.state.current}`;
+      count = `${this.props.current}`;
     }
 
     let outerStyle = Object.assign({}, this.props.style, styles.outer);
@@ -228,7 +232,7 @@ export class CounterBar extends React.Component {
         left: 0;
         bottom: 0;
         width: ${barSize};
-        transition: 0.15s width;
+        transition: 0.2s width;
         position: absolute;
         background-color: ${colour(500)};
         z-index: -1;

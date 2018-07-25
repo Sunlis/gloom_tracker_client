@@ -71,6 +71,14 @@ export class Main extends React.Component {
         counters
       });
     });
+    socket.on('set_players', ({players, me}) => {
+      for (let i in players) {
+        let player = players[i];
+        if (player.id == me) {
+          this.setState({counters: player.counters});
+        }
+      }
+    })
     socket.on('set_name', (name) => {
       this.setState({
         name
@@ -117,8 +125,11 @@ export class Main extends React.Component {
     });
   }
 
-  updateCounter = () => {
-    this.refreshCounters();
+  updateCounter = (counter) => {
+    let counters = this.state.counters;
+    counters.splice(counter.index, 1, counter);
+    this.setState({counters});
+    socket.emit('update_counters', {counters});
   }
 
   render() {

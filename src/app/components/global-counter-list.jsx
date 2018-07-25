@@ -58,20 +58,17 @@ export class GlobalCounterList extends React.Component {
     socket.emit('get_global_counters', {}, (players) => {
       this.setState({players});
     });
-    socket.emit('who_am_i', {}, (id) => {
-      this.setState({ id });
-      socket.on('set_players', this.updatePlayers);
-    });
+    socket.on('set_players', this.updatePlayers);
   }
 
   componentWillUnmount() {
     socket.off('set_players', this.updatePlayers);
   }
 
-  updatePlayers = ({ players }) => {
+  updatePlayers = ({ players, me }) => {
     this.setState({
       players: players.filter((player) => {
-        return player.id != this.state.id;
+        return player.id != me;
       }),
     });
   }

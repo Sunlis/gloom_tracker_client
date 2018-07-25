@@ -69,17 +69,27 @@ export class CounterEditDialog extends React.Component {
   }
 
   handleDoneClick = () => {
+    socket.emit('update_counters', {counters: this.state.counters}, () => {
+      this.props.onClose();
+    });
+  }
+
+  handleCancelClick = () => {
     this.props.onClose();
   }
 
   handleUpdateCounter = (index, counter) => {
-    socket.emit('update_counter', {counter: counter}, () => {});
+    let counters = this.state.counters;
+    counters.splice(index, 1, counter);
+    this.setState({counters});
+    // socket.emit('update_counter', {counter: counter}, () => {});
   }
 
   handleDeleteCounter = (index) => {
     let counters = this.state.counters;
     counters.splice(index, 1);
-    socket.emit('update_counters', {counters: counters}, () => {});
+    this.setState({counters});
+    // socket.emit('update_counters', {counters: counters}, () => {});
   }
 
   moveCounter = (before, after) => {
@@ -93,7 +103,8 @@ export class CounterEditDialog extends React.Component {
         index: i,
       };
     });
-    socket.emit('update_counters', {counters: counters}, () => {});
+    this.setState({counters});
+    // socket.emit('update_counters', {counters: counters}, () => {});
   }
 
   moveCounterUp = (index) => {
@@ -123,6 +134,11 @@ export class CounterEditDialog extends React.Component {
           {counters}
         </DialogContent>
         <DialogActions>
+          <Button variant="contained"
+                  color="default"
+                  onClick={this.handleCancelClick}>
+            Cancel
+          </Button>
           <Button variant="contained"
                   color="primary"
                   onClick={this.handleDoneClick}>
