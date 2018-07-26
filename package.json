@@ -19,6 +19,7 @@
     "lodash": "^4.17.10",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-redux": "^5.0.7",
     "style-it": "^2.0.0",
     "webpack": "^4.0.0"
   },

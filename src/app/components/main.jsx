@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
 import * as _ from 'lodash';
 
 import AppBar from '@material-ui/core/AppBar';
@@ -46,14 +47,12 @@ const styles = {
   },
 };
 
-export class Main extends React.Component {
+class MainImpl extends React.Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      counters: this.props.counters || [],
-      name: this.props.name || '',
       dialogOpen: false,
       drawerOpen: false,
     };
@@ -125,23 +124,15 @@ export class Main extends React.Component {
     });
   }
 
-  updateCounter = (counter) => {
-    let counters = this.state.counters;
-    counters.splice(counter.index, 1, counter);
-    this.setState({counters});
-    socket.emit('update_counters', {counters});
-  }
-
   render() {
-    let counters = _.map(_.sortBy(this.state.counters, 'index'), (counter, index) => {
+    let counters = this.props.player.counters.map((counter, index) => {
       return <CounterBar key={index}
-                         index={index}
                          current={counter.current}
                          max={counter.max}
                          label={counter.label}
                          colour={counter.colour}
                          priv={counter.priv}
-                         updateCounter={this.updateCounter}>
+                         updateCounter={(counter) => { this.props.updateCounter(index, counter) }}>
              </CounterBar>
     });
 
@@ -151,7 +142,7 @@ export class Main extends React.Component {
           <img src={hamburger}
                style={styles.hamburger}
                onClick={this.handleHamburgerClick} />
-          <span>{this.state.name}</span>
+          <span>{this.props.player.name}</span>
         </AppBar>
         <div style={styles.counterWrapper}>
           {counters}
@@ -168,7 +159,7 @@ export class Main extends React.Component {
         <Drawer open={this.state.drawerOpen}
                 onClose={this.handleDrawerClose}
                 style={styles.drawer}>
-          <DrawerContents name={this.state.name}
+          <DrawerContents name={this.props.player.name}
                           onClose={this.handleDrawerClose}>
           </DrawerContents>
         </Drawer>
@@ -176,3 +167,19 @@ export class Main extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    player: state.player,
+  };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addCounter: (counter) => dispatch(addCounter(counter)),
+    updateCounter: (index, counter) => dispatch(updateCounter(index, counter)),
+    moveCounter: (before, after) => dispatch(moveCounter(before, after)),
+  };
+}
+
+export const Main = connect(mapStateToProps, mapDispatchToProps)(MainImpl);

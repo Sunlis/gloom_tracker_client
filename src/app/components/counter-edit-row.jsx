@@ -147,11 +147,11 @@ export class CounterEditRow extends React.Component {
   }
 
   handleUpClick = () => {
-    this.props.moveCounterUp(this.props.counter.index);
+    this.props.moveCounterUp();
   }
 
   handleDownClick = () => {
-    this.props.moveCounterDown(this.props.counter.index);
+    this.props.moveCounterDown();
   }
 
   render() {

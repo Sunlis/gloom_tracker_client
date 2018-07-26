@@ -115,14 +115,14 @@ export class CounterEditDialog extends React.Component {
   }
 
   render() {
-    let counters = this.state.counters.map((counter) => {
+    let counters = this.state.counters.map((counter, index) => {
       return (
         <CounterEditRow counter={counter}
                         key={counter.index}
                         updateCounter={this.handleUpdateCounter}
                         deleteCounter={this.handleDeleteCounter}
-                        moveCounterUp={this.moveCounterUp}
-                        moveCounterDown={this.moveCounterDown}>
+                        moveCounterUp={() => { this.moveCounterUp(index) }}
+                        moveCounterDown={() => { this.moveCounterDown(index) }}>
         </CounterEditRow>
       );
     });
