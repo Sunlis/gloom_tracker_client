@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
 import * as _ from 'lodash';
 
 import AppBar from '@material-ui/core/AppBar';
@@ -8,10 +9,11 @@ import Add from '@material-ui/icons/Add';
 import { blue } from '@material-ui/core/colors';
 
 import hamburger from '../../img/hamburger.png';
-import {NewCounterDialog} from './new-counter-dialog.jsx';
-import {CounterBar} from './counter-bar.jsx';
-import {DrawerContents} from './drawer-contents.jsx';
-import { socket } from '../socket.js';
+import { NewCounterDialog } from './new-counter-dialog.jsx';
+import { CounterBar } from './counter-bar.jsx';
+import { DrawerContents } from './drawer-contents.jsx';
+
+import { addCounter, updateCounter } from '../actions/player';
 
 const styles = {
   main: {
@@ -46,65 +48,21 @@ const styles = {
   },
 };
 
-export class Main extends React.Component {
+class MainImpl extends React.Component {
 
   constructor(props) {
     super(props);
 
     this.state = {
-      counters: this.props.counters || [],
-      name: this.props.name || '',
       dialogOpen: false,
       drawerOpen: false,
     };
-  }
-
-  componentDidMount() {
-    this.refreshCounters();
-    socket.emit('get_name', {}, (result) => {
-      this.setState({
-        name: result || '',
-      });
-    });
-    socket.on('set_counters', (counters) => {
-      this.setState({
-        counters
-      });
-    });
-    socket.on('set_players', ({players, me}) => {
-      for (let i in players) {
-        let player = players[i];
-        if (player.id == me) {
-          this.setState({counters: player.counters});
-        }
-      }
-    })
-    socket.on('set_name', (name) => {
-      this.setState({
-        name
-      });
-    });
-  }
-
-  refreshCounters = () => {
-    socket.emit('get_counters', {}, (result) => {
-      this.setState({
-        counters: result || [],
-      });
-    });
   }
 
   newCounterClick = () => {
     this.setState({
       dialogOpen: true,
     });
-  }
-
-  handleNewCounter = (counter) => {
-    socket.emit('new_counter', {counter}, () => {
-      this.refreshCounters();
-    });
-    this.handeNewCounterClose();
   }
 
   handeNewCounterClose = () => {
@@ -125,23 +83,15 @@ export class Main extends React.Component {
     });
   }
 
-  updateCounter = (counter) => {
-    let counters = this.state.counters;
-    counters.splice(counter.index, 1, counter);
-    this.setState({counters});
-    socket.emit('update_counters', {counters});
-  }
-
   render() {
-    let counters = _.map(_.sortBy(this.state.counters, 'index'), (counter, index) => {
+    let counters = (this.props.player.counters || []).map((counter, index) => {
       return <CounterBar key={index}
-                         index={index}
                          current={counter.current}
                          max={counter.max}
                          label={counter.label}
                          colour={counter.colour}
                          priv={counter.priv}
-                         updateCounter={this.updateCounter}>
+                         updateCounter={(counter) => { this.props.updateCounter(index, counter) }}>
              </CounterBar>
     });
 
@@ -151,7 +101,7 @@ export class Main extends React.Component {
           <img src={hamburger}
                style={styles.hamburger}
                onClick={this.handleHamburgerClick} />
-          <span>{this.state.name}</span>
+          <span>{this.props.player.name}</span>
         </AppBar>
         <div style={styles.counterWrapper}>
           {counters}
@@ -162,13 +112,13 @@ export class Main extends React.Component {
         </Button>
         <NewCounterDialog
           open={this.state.dialogOpen}
-          createNewCounter={this.handleNewCounter}
+          createNewCounter={this.props.addCounter}
           onClose={this.handeNewCounterClose}>
         </NewCounterDialog>
         <Drawer open={this.state.drawerOpen}
                 onClose={this.handleDrawerClose}
                 style={styles.drawer}>
-          <DrawerContents name={this.state.name}
+          <DrawerContents name={this.props.player.name}
                           onClose={this.handleDrawerClose}>
           </DrawerContents>
         </Drawer>
@@ -176,3 +126,18 @@ export class Main extends React.Component {
     );
   }
 }
+
+const mapStateToProps = (state) => {
+  return {
+    player: state.player,
+  };
+}
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    addCounter: (counter) => dispatch(addCounter(counter)),
+    updateCounter: (index, counter) => dispatch(updateCounter(index, counter)),
+  };
+}
+
+export const Main = connect(mapStateToProps, mapDispatchToProps)(MainImpl);

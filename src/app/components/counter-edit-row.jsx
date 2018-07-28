@@ -147,11 +147,11 @@ export class CounterEditRow extends React.Component {
   }
 
   handleUpClick = () => {
-    this.props.moveCounterUp(this.props.counter.index);
+    this.props.moveCounterUp();
   }
 
   handleDownClick = () => {
-    this.props.moveCounterDown(this.props.counter.index);
+    this.props.moveCounterDown();
   }
 
   render() {
@@ -206,7 +206,7 @@ export class CounterEditRow extends React.Component {
                  type="number"
                  placeholder="Max"
                  onChange={this.onMaxChange}
-                 value={this.props.counter.max || ''} />
+                 value={this.props.counter.max} />
         </span>
         <Button variant="contained"
                 style={styles.lockButton}

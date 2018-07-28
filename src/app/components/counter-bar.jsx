@@ -10,8 +10,6 @@ import {
   green, lightGreen, lime, yellow, amber, orange, deepOrange, brown, grey
 } from '@material-ui/core/colors';
 
-import { socket } from '../socket.js';
-
 const styles = {
   outer: {
     margin: '8px 0',
@@ -104,18 +102,11 @@ export class CounterBar extends React.Component {
     };
   }
 
-  // componentDidUpdate(prevProps, prevState) {
-  //   if (this.state.current != prevState.current) {
-  //     this.updateCounter();
-  //   }
-  // }
-
   updateCounter = (props) => {
     this.props.updateCounter({
       ...this.props,
       ...props,
     });
-    // socket.emit('update_counter', {counter: properties}, () => {});
   }
 
   handleRemoveMouseDown = (ev) => {
