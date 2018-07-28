@@ -100,21 +100,21 @@ export class CounterEditRow extends React.Component {
   }
 
   onLabelChange = (ev) => {
-    this.props.updateCounter(this.props.counter.index, {
+    this.props.updateCounter({
       ...this.props.counter,
       label: ev.target.value,
     });
   }
 
   onMaxChange = (ev) => {
-    this.props.updateCounter(this.props.counter.index, {
+    this.props.updateCounter({
       ...this.props.counter,
       max: ev.target.value,
     });
   }
 
   handleLockClick = () => {
-    this.props.updateCounter(this.props.counter.index, {
+    this.props.updateCounter({
       ...this.props.counter,
       priv: !this.props.counter.priv,
     });
@@ -136,11 +136,11 @@ export class CounterEditRow extends React.Component {
   }
   handleDeleteConfirmYes = () => {
     this.handleDeleteConfirmClose();
-    this.props.deleteCounter(this.props.counter.index);
+    this.props.deleteCounter();
   }
 
   handleColourChange = (ev) => {
-    this.props.updateCounter(this.props.counter.index, {
+    this.props.updateCounter({
       ...this.props.counter,
       colour: ev.target.value,
     })
