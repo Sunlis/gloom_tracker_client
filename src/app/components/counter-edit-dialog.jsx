@@ -70,7 +70,7 @@ class CounterEditDialogImpl extends React.Component {
     let counters = this.props.counters.map((counter, index) => {
       return (
         <CounterEditRow counter={counter}
-                        key={counter.index}
+                        key={index}
                         updateCounter={this.props.updateCounter}
                         deleteCounter={this.props.deleteCounter}
                         moveCounterUp={() => { this.moveCounterUp(index) }}

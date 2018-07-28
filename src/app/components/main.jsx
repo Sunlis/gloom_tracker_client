@@ -59,7 +59,6 @@ class MainImpl extends React.Component {
     };
   }
 
-          this.setState({counters: player.counters});
   newCounterClick = () => {
     this.setState({
       dialogOpen: true,

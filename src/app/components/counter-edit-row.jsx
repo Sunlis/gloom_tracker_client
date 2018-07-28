@@ -206,7 +206,7 @@ export class CounterEditRow extends React.Component {
                  type="number"
                  placeholder="Max"
                  onChange={this.onMaxChange}
-                 value={this.props.counter.max || ''} />
+                 value={this.props.counter.max} />
         </span>
         <Button variant="contained"
                 style={styles.lockButton}

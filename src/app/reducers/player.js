@@ -1,7 +1,6 @@
 import { ACTION_TYPES } from '../actions/player';
 
 export const player = (state = {}, action) => {
-  console.log('update', action);
   switch (action.type) {
     case ACTION_TYPES.ADD_COUNTER: {
       return {
@@ -22,8 +21,8 @@ export const player = (state = {}, action) => {
     }
     case ACTION_TYPES.MOVE_COUNTER: {
       let counters = [...state.counters];
-      let counter = counters.splice(action.before, 1);
-      counters.splice(action.after, 1, counter);
+      let counter = counters.splice(action.before, 1)[0];
+      counters.splice(action.after, 0, counter);
       return {
         ...state,
         counters,

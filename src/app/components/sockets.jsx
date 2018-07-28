@@ -18,7 +18,6 @@ class SocketImpl extends React.Component {
 
   handleSetPlayers = ({players}) => {
     let me = window.location.pathname.replace('/','');
-    console.log('set players', players);
     let other = [];
     players.forEach((player) => {
       if (player.id == me) {
@@ -31,6 +30,9 @@ class SocketImpl extends React.Component {
   }
 
   componentDidUpdate = (prevProps, prevState) => {
+    if (this.props.isDataFromServer) {
+      return "fuck you";
+    }
     if (DeepDiff(this.props.player.counters, prevProps.player.counters) && !!prevProps.player.counters) {
       socket.emit('update_counters', {counters: this.props.player.counters});
     } else if (this.props.player.name != prevProps.player.name) {
@@ -58,9 +60,9 @@ export const Socket = connect(
   (state) => state,
   (dispatch) => {
     return {
-      updateCounters: (counters) => dispatch(updateCounters(counters)),
-      updatePlayers: (players) => dispatch(updatePlayers(players)),
-      setPlayer: (player) => dispatch(updatePlayer(player)),
-      setName: (name) => dispatch(setName(name)),
+      updateCounters: (counters) => dispatch(updateCounters(counters, true)),
+      updatePlayers: (players) => dispatch(updatePlayers(players, true)),
+      setPlayer: (player) => dispatch(updatePlayer(player, true)),
+      setName: (name) => dispatch(setName(name, true)),
     }
   })(SocketImpl);
