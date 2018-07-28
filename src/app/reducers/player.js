@@ -1,6 +1,9 @@
 import { ACTION_TYPES } from '../actions/player';
 
 export const player = (state = {}, action) => {
+  if (!state.counters) {
+    state.counters = [];
+  }
   switch (action.type) {
     case ACTION_TYPES.ADD_COUNTER: {
       return {
