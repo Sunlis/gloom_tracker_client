@@ -1,8 +1,8 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
 
 import Divider from '@material-ui/core/Divider';
 
-import { socket } from '../socket.js';
 import * as colour from '../colour.js';
 
 const styles = {
@@ -45,37 +45,16 @@ const styles = {
   },
 };
 
-export class GlobalCounterList extends React.Component {
+class GlobalCounterListImpl extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      players: []
-    };
-  }
-
-  componentDidMount() {
-    socket.emit('get_global_counters', {}, (players) => {
-      this.setState({players});
-    });
-    socket.on('set_players', this.updatePlayers);
-  }
-
-  componentWillUnmount() {
-    socket.off('set_players', this.updatePlayers);
-  }
-
-  updatePlayers = ({ players, me }) => {
-    this.setState({
-      players: players.filter((player) => {
-        return player.id != me;
-      }),
-    });
   }
 
   render() {
-    let players = this.state.players.map((player) => {
-      let counters = player.counters.map((counter) => {
+    let players = this.props.players.map((player) => {
+      let counters = player.counters.filter((counter) => {
+        return !counter.priv;
+      }).map((counter) => {
         return (
           <div key={counter.index} style={styles.counter}>
             <span style={{opacity: (counter.label ? 1.0 : 0.5)}}>
@@ -112,3 +91,12 @@ export class GlobalCounterList extends React.Component {
     );
   }
 }
+
+export const GlobalCounterList = connect(
+  (state) => {
+    return {
+      players: state.otherPlayers,
+    };
+  }, (dispatch) => {
+    return {};
+  })(GlobalCounterListImpl);

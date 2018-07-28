@@ -1,13 +1,23 @@
 import * as React from 'react';
-import {render} from 'react-dom';
-// import { MuiThemeProvider } from '@material-ui/core/styles';
+import { render } from 'react-dom';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 
-import {Main} from './components/main.jsx';
+import { rootReducer } from './reducers/root-reducer';
+import { Main } from './components/main.jsx';
+import { Socket } from './components/sockets.jsx';
+
+const store = createStore(rootReducer);
 
 class App extends React.Component {
   render () {
     return (
-    	<Main></Main>
+      <Provider store={store}>
+        <div>
+      	  <Main></Main>
+          <Socket></Socket>
+        </div>
+      </Provider>
     );
   }
 }

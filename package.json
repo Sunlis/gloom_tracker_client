@@ -16,10 +16,12 @@
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-react": "^6.24.1",
+    "deep-diff": "^1.0.1",
     "lodash": "^4.17.10",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
     "style-it": "^2.0.0",
     "webpack": "^4.0.0"
   },

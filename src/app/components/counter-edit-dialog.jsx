@@ -1,5 +1,5 @@
 import * as React from 'react';
-import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 
 import Button from '@material-ui/core/Button';
 import Add from '@material-ui/icons/Add';
@@ -20,7 +20,8 @@ import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 import { CounterEditRow } from './counter-edit-row.jsx';
-import {socket} from '../socket.js';
+
+import { moveCounter, updateCounter, updateCounters, deleteCounter } from '../actions/player';
 
 const styles = {
 };
@@ -41,70 +42,21 @@ const COLOUR_NAMES = [
 
 const ResponsiveDialog = withMobileDialog()(Dialog);
 
-export class CounterEditDialog extends React.Component {
+class CounterEditDialogImpl extends React.Component {
 
   constructor(props) {
     super(props);
-
-    this.state = {
-      counters: [],
-    };
-  }
-
-  componentDidMount() {
-    socket.emit('get_counters', {}, (counters) => {
-      this.setState({
-        counters
-      });
-    });
-    socket.on('set_counters', this.setCounters);
-  }
-
-  componentWillUnmount() {
-    socket.off('set_counters', this.setCounters);
-  }
-
-  setCounters = (counters) => {
-    this.setState({ counters });
   }
 
   handleDoneClick = () => {
-    socket.emit('update_counters', {counters: this.state.counters}, () => {
-      this.props.onClose();
-    });
-  }
-
-  handleCancelClick = () => {
     this.props.onClose();
   }
 
-  handleUpdateCounter = (index, counter) => {
-    let counters = this.state.counters;
-    counters.splice(index, 1, counter);
-    this.setState({counters});
-    // socket.emit('update_counter', {counter: counter}, () => {});
-  }
-
-  handleDeleteCounter = (index) => {
-    let counters = this.state.counters;
-    counters.splice(index, 1);
-    this.setState({counters});
-    // socket.emit('update_counters', {counters: counters}, () => {});
-  }
-
   moveCounter = (before, after) => {
-    let counters = this.state.counters;
     after = Math.max(0, after);
-    let counter = counters.splice(before, 1)[0];
-    counters.splice(after, 0, counter);
-    counters = counters.map((counter, i) => {
-      return {
-        ...counter,
-        index: i,
-      };
-    });
-    this.setState({counters});
-    // socket.emit('update_counters', {counters: counters}, () => {});
+    if (after != before) {
+      this.props.moveCounter(before, after);
+    }
   }
 
   moveCounterUp = (index) => {
@@ -115,12 +67,12 @@ export class CounterEditDialog extends React.Component {
   }
 
   render() {
-    let counters = this.state.counters.map((counter, index) => {
+    let counters = this.props.counters.map((counter, index) => {
       return (
         <CounterEditRow counter={counter}
                         key={counter.index}
-                        updateCounter={this.handleUpdateCounter}
-                        deleteCounter={this.handleDeleteCounter}
+                        updateCounter={this.props.updateCounter}
+                        deleteCounter={this.props.deleteCounter}
                         moveCounterUp={() => { this.moveCounterUp(index) }}
                         moveCounterDown={() => { this.moveCounterDown(index) }}>
         </CounterEditRow>
@@ -135,11 +87,6 @@ export class CounterEditDialog extends React.Component {
         </DialogContent>
         <DialogActions>
           <Button variant="contained"
-                  color="default"
-                  onClick={this.handleCancelClick}>
-            Cancel
-          </Button>
-          <Button variant="contained"
                   color="primary"
                   onClick={this.handleDoneClick}>
             Done
@@ -149,3 +96,17 @@ export class CounterEditDialog extends React.Component {
     );
   }
 }
+
+export const CounterEditDialog = connect(
+  (state) => {
+    return {
+      counters: state.player.counters,
+    };
+  }, (dispatch) => {
+    return {
+      moveCounter: (before, after) => dispatch(moveCounter(before, after)),
+      updateCounter: (index, counter) => dispatch(updateCounter(index, counter)),
+      updateCounters: (counters) => dispatch(updateCounters(counters)),
+      deleteCounter: (index) => dispatch(deleteCounter(index)),
+    };
+  })(CounterEditDialogImpl);

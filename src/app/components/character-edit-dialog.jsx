@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { connect } from 'react-redux';
 
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -8,11 +9,12 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import TextField from '@material-ui/core/TextField';
 
-import {socket} from '../socket.js';
+import { setName } from '../actions/player';
+
 
 const styles = {};
 
-export class CharacterEditDialog extends React.Component {
+class CharacterEditDialogImpl extends React.Component {
   constructor(props) {
     super(props);
 
@@ -22,9 +24,11 @@ export class CharacterEditDialog extends React.Component {
   }
 
   componentWillReceiveProps(props) {
-    this.setState({
-      name: props.name || 'Name',
-    });
+    if (props.name != this.state.name) {
+      this.setState({
+        name: props.name || 'Name',
+      });
+    }
   }
 
   handleClose = () => {
@@ -38,9 +42,8 @@ export class CharacterEditDialog extends React.Component {
   }
 
   handleSave = () => {
-    socket.emit('update_name', {name: this.state.name}, () => {
-      this.handleClose();
-    });
+    this.props.setName(this.state.name);
+    this.handleClose();
   }
 
   render() {
@@ -67,3 +70,13 @@ export class CharacterEditDialog extends React.Component {
   }
 }
 
+export const CharacterEditDialog = connect(
+  (state) => {
+    return {
+      name: state.player.name,
+    };
+  }, (dispatch) => {
+    return {
+      setName: (name) => dispatch(setName(name)),
+    };
+  })(CharacterEditDialogImpl);

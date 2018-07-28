@@ -9,10 +9,11 @@ import Add from '@material-ui/icons/Add';
 import { blue } from '@material-ui/core/colors';
 
 import hamburger from '../../img/hamburger.png';
-import {NewCounterDialog} from './new-counter-dialog.jsx';
-import {CounterBar} from './counter-bar.jsx';
-import {DrawerContents} from './drawer-contents.jsx';
-import { socket } from '../socket.js';
+import { NewCounterDialog } from './new-counter-dialog.jsx';
+import { CounterBar } from './counter-bar.jsx';
+import { DrawerContents } from './drawer-contents.jsx';
+
+import { addCounter, updateCounter } from '../actions/player';
 
 const styles = {
   main: {
@@ -58,52 +59,11 @@ class MainImpl extends React.Component {
     };
   }
 
-  componentDidMount() {
-    this.refreshCounters();
-    socket.emit('get_name', {}, (result) => {
-      this.setState({
-        name: result || '',
-      });
-    });
-    socket.on('set_counters', (counters) => {
-      this.setState({
-        counters
-      });
-    });
-    socket.on('set_players', ({players, me}) => {
-      for (let i in players) {
-        let player = players[i];
-        if (player.id == me) {
           this.setState({counters: player.counters});
-        }
-      }
-    })
-    socket.on('set_name', (name) => {
-      this.setState({
-        name
-      });
-    });
-  }
-
-  refreshCounters = () => {
-    socket.emit('get_counters', {}, (result) => {
-      this.setState({
-        counters: result || [],
-      });
-    });
-  }
-
   newCounterClick = () => {
     this.setState({
       dialogOpen: true,
     });
-  }
-
-  handleNewCounter = (counter) => {
-    socket.emit('new_counter', {counter}, () => {
-      this.refreshCounters();
-    });
-    this.handeNewCounterClose();
   }
 
   handeNewCounterClose = () => {
@@ -125,7 +85,7 @@ class MainImpl extends React.Component {
   }
 
   render() {
-    let counters = this.props.player.counters.map((counter, index) => {
+    let counters = (this.props.player.counters || []).map((counter, index) => {
       return <CounterBar key={index}
                          current={counter.current}
                          max={counter.max}
@@ -153,7 +113,7 @@ class MainImpl extends React.Component {
         </Button>
         <NewCounterDialog
           open={this.state.dialogOpen}
-          createNewCounter={this.handleNewCounter}
+          createNewCounter={this.props.addCounter}
           onClose={this.handeNewCounterClose}>
         </NewCounterDialog>
         <Drawer open={this.state.drawerOpen}
@@ -178,7 +138,6 @@ const mapDispatchToProps = (dispatch) => {
   return {
     addCounter: (counter) => dispatch(addCounter(counter)),
     updateCounter: (index, counter) => dispatch(updateCounter(index, counter)),
-    moveCounter: (before, after) => dispatch(moveCounter(before, after)),
   };
 }
 

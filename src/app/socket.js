@@ -13,10 +13,3 @@ export const socket = {
   removeListener: socket_.removeListener.bind(socket_),
   off: socket_.off.bind(socket_),
 };
-
-class SocketShit extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-  render() {}
-}
