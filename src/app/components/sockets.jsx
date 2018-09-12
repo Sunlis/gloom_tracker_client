@@ -41,6 +41,9 @@ class SocketImpl extends React.Component {
   }
 
   componentDidMount() {
+    socket.on('reconnect', () => {
+      socket.emit('ready');
+    });
     Object.entries(this.listeners).forEach(([event, method]) => {
       socket.on(event, method);
     });
