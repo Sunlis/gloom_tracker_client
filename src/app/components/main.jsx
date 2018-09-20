@@ -103,7 +103,7 @@ class MainImpl extends React.Component {
                onClick={this.handleHamburgerClick} />
           <span>{this.props.player.name}</span>
         </AppBar>
-        <div style={styles.counterWrapper}>
+        <div style={styles.counterWrapper} className="counters">
           {counters}
         </div>
         <Button variant='raised' onClick={this.newCounterClick}>

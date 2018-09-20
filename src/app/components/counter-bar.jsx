@@ -18,7 +18,7 @@ const styles = {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    flex: '1',
+    // flex: '1',
   },
   bar: {
     margin: '0 4px',
