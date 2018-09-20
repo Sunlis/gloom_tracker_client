@@ -21,6 +21,7 @@ const styles = {
     // flex: '1',
   },
   bar: {
+    height: '85px',
     margin: '0 4px',
     borderRadius: '8px',
     overflow: 'hidden',
